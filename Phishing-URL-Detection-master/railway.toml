@@ -1,0 +1,24 @@
+# ================================
+# Railway.app Deployment Configuration
+# ================================
+
+# This file configures automatic deployment on Railway.app
+# Visit: https://railway.app
+
+# Build Configuration
+[build]
+  builder = "nixpacks"
+
+# Service Configuration  
+[deploy]
+  startCommand = "uvicorn enhanced_main:app --host 0.0.0.0 --port $PORT"
+  restartPolicyType = "always"
+
+# Environment Variables (set in Railway dashboard)
+# PORT = 8000 (automatically set by Railway)
+# ENVIRONMENT = production
+# MAX_REQUESTS_PER_MINUTE = 100
+
+# Health Check
+healthcheckPath = "/health"
+healthcheckTimeout = 30

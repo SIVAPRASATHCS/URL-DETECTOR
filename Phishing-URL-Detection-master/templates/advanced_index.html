@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Phishing URL Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #34495e;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .url-scanner {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .url-input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        #url-input {
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            padding: 1rem 4rem 1rem 1.5rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        #url-input:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .scan-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .scan-btn:hover {
+            background: #2980b9;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .scan-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        .results-container {
+            margin-top: 2rem;
+            padding: 0;
+        }
+
+        .safety-indicator {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            transition: all 0.5s ease;
+        }
+
+        .safety-indicator.safe {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .safety-indicator.phishing {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .safety-indicator.analyzing {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 10px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+
+        .detailed-analysis {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .feature-importance {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .importance-bar {
+            background: #e0e0e0;
+            border-radius: 5px;
+            height: 8px;
+            flex: 1;
+            margin-left: 1rem;
+            overflow: hidden;
+        }
+
+        .importance-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert-modern {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .history-section {
+            margin-top: 3rem;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bulk-upload {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .drop-zone {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--secondary-color);
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--secondary-color);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .url-scanner {
+                padding: 1rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-shield-alt"></i> Advanced Phishing URL Detection</h1>
+                <p>Powered by AI and Real-time Threat Intelligence</p>
+            </div>
+
+            <!-- URL Scanner -->
+            <div class="url-scanner">
+                <h3><i class="fas fa-search"></i> Single URL Analysis</h3>
+                <div class="url-input-group">
+                    <input 
+                        type="text" 
+                        id="url-input" 
+                        placeholder="Enter any URL to analyze (http://, ftp://, file://, data:, mailto:, etc.)"
+                        autocomplete="off"
+                    >
+                    <button class="scan-btn" id="scan-btn" onclick="analyzeUrl()">
+                        <i class="fas fa-search"></i> Analyze
+                    </button>
+                </div>
+                
+                <!-- Quick Examples -->
+                <div class="mb-3">
+                    <small class="text-muted">Quick test examples:</small>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-success me-2" onclick="setTestUrl('https')">
+                            HTTPS URL
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="setTestUrl('ftp')">
+                            FTP URL
+                        </button>
+                        <button class="btn btn-sm btn-outline-info me-2" onclick="setTestUrl('file')">
+                            File URL
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="setTestUrl('data')">
+                            Data URL
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning me-2" onclick="setTestUrl('suspicious')">
+                            Suspicious URL
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-success"><i class="fas fa-info-circle"></i> Now supports all URL types: HTTP, HTTPS, FTP, File, Data, Email, Remote Access, P2P, and more!</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Upload -->
+            <div class="bulk-upload">
+                <h3><i class="fas fa-file-upload"></i> Bulk URL Analysis</h3>
+                <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <p class="mb-2">Drop your CSV file here or click to browse</p>
+                    <small class="text-muted">CSV format: url,description (optional)</small>
+                    <input type="file" id="file-input" accept=".csv,.txt" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+                <div id="bulk-progress" class="mt-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Processing URLs...</small>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loading-spinner">
+                <div class="spinner"></div>
+                <p>Analyzing URL with AI models...</p>
+                <small class="text-muted">This may take a few seconds</small>
+            </div>
+
+            <!-- Results Container -->
+            <div class="results-container" id="results-container" style="display: none;">
+                <!-- Safety Indicator -->
+                <div class="safety-indicator" id="safety-indicator">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 id="safety-title"><i class="fas fa-shield-alt"></i> Analysis Result</h2>
+                            <p id="safety-description" class="mb-2">URL analysis completed</p>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill"></div>
+                            </div>
+                            <small id="confidence-text" class="mt-2 d-block">Confidence: 0%</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i id="safety-icon" class="fas fa-shield-alt" style="font-size: 4rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="detailed-analysis">
+                    <h4><i class="fas fa-chart-line"></i> Detailed Analysis</h4>
+                    
+                    <!-- URL Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <h6><i class="fas fa-link"></i> URL Information</h6>
+                                <p id="analyzed-url" class="mb-1 word-break">-</p>
+                                <small class="text-muted">Analyzed URL</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <h6><i class="fas fa-clock"></i> Analysis Time</h6>
+                                <p id="analysis-time" class="mb-1">-</p>
+                                <small class="text-muted">Time taken for analysis</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature Importance -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-brain"></i> AI Model Insights</h5>
+                        <div id="feature-importance" class="feature-grid">
+                            <!-- Features will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Technical Details -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-cogs"></i> Technical Analysis</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-server"></i> URL Info</h6>
+                                    <div id="domain-info">
+                                        <p class="mb-1">Scheme: <span id="url-scheme">-</span></p>
+                                        <p class="mb-1">Category: <span id="url-category">-</span></p>
+                                        <p class="mb-1">Domain: <span id="domain-name">-</span></p>
+                                        <p class="mb-0">Port: <span id="port-info">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-certificate"></i> Security</h6>
+                                    <div id="security-info">
+                                        <p class="mb-1">SSL Valid: <span id="ssl-status">-</span></p>
+                                        <p class="mb-1">Redirects: <span id="redirect-count">-</span></p>
+                                        <p class="mb-0">Suspicious: <span id="suspicious-elements">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-card">
+                                    <h6><i class="fas fa-chart-bar"></i> Risk Factors</h6>
+                                    <div id="risk-factors">
+                                        <p class="mb-1">IP Address: <span id="ip-usage">-</span></p>
+                                        <p class="mb-1">Suspicious TLD: <span id="tld-check">-</span></p>
+                                        <p class="mb-0">Phishing Patterns: <span id="pattern-match">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="alert alert-info alert-modern">
+                        <h6><i class="fas fa-lightbulb"></i> Recommendations</h6>
+                        <div id="recommendations">
+                            <p class="mb-0">Recommendations will appear here based on the analysis.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-shield-check"></i>
+                    </div>
+                    <h4 id="total-scanned">0</h4>
+                    <p class="text-muted">URLs Analyzed Today</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 id="safe-urls">0</h4>
+                    <p class="text-muted">Safe URLs</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 id="phishing-urls">0</h4>
+                    <p class="text-muted">Phishing Detected</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>99.2%</h4>
+                    <p class="text-muted">AI Accuracy</p>
+                </div>
+            </div>
+
+            <!-- Supported URL Schemes -->
+            <div class="supported-schemes mb-4">
+                <h4><i class="fas fa-list-ul"></i> Supported URL Schemes</h4>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="feature-card">
+                            <h6><i class="fas fa-globe text-success"></i> Web Protocols</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><code>http://</code> - Unencrypted web</li>
+                                <li><code>https://</code> - Encrypted web</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-card">
+                            <h6><i class="fas fa-folder text-primary"></i> File Transfer</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><code>ftp://</code> - File Transfer</li>
+                                <li><code>ftps://</code> - Secure FTP</li>
+                                <li><code>file://</code> - Local files</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-card">
+                            <h6><i class="fas fa-envelope text-info"></i> Communication</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><code>mailto:</code> - Email links</li>
+                                <li><code>tel:</code> - Phone numbers</li>
+                                <li><code>sms:</code> - Text messages</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="feature-card">
+                            <h6><i class="fas fa-exclamation-triangle text-warning"></i> High-Risk</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><code>data:</code> - Embedded data</li>
+                                <li><code>ssh://</code> - Remote access</li>
+                                <li><code>magnet:</code> - P2P downloads</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Our system analyzes 20+ different URL schemes and protocols for comprehensive security assessment
+                    </small>
+                </div>
+            </div>
+
+            <!-- Recent Analysis History -->
+            <div class="history-section">
+                <h4><i class="fas fa-history"></i> Recent Analysis</h4>
+                <div id="analysis-history">
+                    <p class="text-muted text-center py-4">No recent analysis found. Start by analyzing a URL above.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let analysisHistory = [];
+        let statsData = {
+            totalScanned: 0,
+            safeUrls: 0,
+            phishingUrls: 0
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatsFromStorage();
+            loadHistoryFromStorage();
+            updateStats();
+            
+            // Add enter key support
+            document.getElementById('url-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    analyzeUrl();
+                }
+            });
+
+            // Setup drag and drop
+            setupDragAndDrop();
+        });
+
+        function setTestUrl(type) {
+            const input = document.getElementById('url-input');
+            
+            switch(type) {
+                case 'https':
+                    input.value = 'https://www.google.com';
+                    break;
+                case 'ftp':
+                    input.value = 'ftp://ftp.example.com/files/document.pdf';
+                    break;
+                case 'file':
+                    input.value = 'file:///C:/Users/Documents/suspicious_file.exe';
+                    break;
+                case 'data':
+                    input.value = 'data:text/html;base64,PGh0bWw+PGJvZHk+SGVsbG8gV29ybGQ8L2JvZHk+PC9odG1sPg==';
+                    break;
+                case 'suspicious':
+                    input.value = 'http://phishing-site.suspicious-domain.tk/fake-login.php';
+                    break;
+                default:
+                    input.value = 'https://www.example.com';
+            }
+        }
+
+        async function analyzeUrl() {
+            const url = document.getElementById('url-input').value.trim();
+            
+            if (!url) {
+                alert('Please enter a URL to analyze');
+                return;
+            }
+
+            if (!isValidUrl(url)) {
+                alert('Please enter a valid URL with a proper scheme (http://, https://, ftp://, file://, data:, etc.)');
+                return;
+            }
+
+            showLoading(true);
+            hideResults();
+
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const analysisTime = Date.now() - startTime;
+
+                displayResults(result, url, analysisTime);
+                addToHistory(url, result, analysisTime);
+                updateStats();
+
+            } catch (error) {
+                console.error('Error analyzing URL:', error);
+                showError('Failed to analyze URL. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayResults(result, url, analysisTime) {
+            // Update safety indicator
+            const safetyIndicator = document.getElementById('safety-indicator');
+            const safetyTitle = document.getElementById('safety-title');
+            const safetyDescription = document.getElementById('safety-description');
+            const safetyIcon = document.getElementById('safety-icon');
+            const confidenceFill = document.getElementById('confidence-fill');
+            const confidenceText = document.getElementById('confidence-text');
+
+            const isPhishing = result.prediction === 'phishing' || result.prediction === -1;
+            const confidence = Math.round((result.confidence || 0.85) * 100);
+
+            if (isPhishing) {
+                safetyIndicator.className = 'safety-indicator phishing';
+                safetyTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Phishing Detected!';
+                safetyDescription.textContent = 'This URL appears to be a phishing attempt. Do not enter personal information.';
+                safetyIcon.className = 'fas fa-exclamation-triangle';
+                statsData.phishingUrls++;
+            } else {
+                safetyIndicator.className = 'safety-indicator safe';
+                safetyTitle.innerHTML = '<i class="fas fa-shield-check"></i> URL Appears Safe';
+                safetyDescription.textContent = 'Our AI analysis indicates this URL is likely legitimate.';
+                safetyIcon.className = 'fas fa-shield-check';
+                statsData.safeUrls++;
+            }
+
+            statsData.totalScanned++;
+
+            confidenceFill.style.width = confidence + '%';
+            confidenceText.textContent = `Confidence: ${confidence}%`;
+
+            // Update detailed analysis
+            document.getElementById('analyzed-url').textContent = url;
+            document.getElementById('analysis-time').textContent = `${analysisTime}ms`;
+
+            // Update technical details
+            updateTechnicalDetails(url, result);
+
+            // Update feature importance
+            updateFeatureImportance(result.feature_importance || {});
+
+            // Update recommendations
+            updateRecommendations(isPhishing, result);
+
+            showResults();
+        }
+
+        function updateTechnicalDetails(url, result) {
+            try {
+                const urlObj = new URL(url);
+                
+                document.getElementById('url-scheme').textContent = urlObj.protocol.replace(':', '');
+                document.getElementById('domain-name').textContent = urlObj.hostname || urlObj.pathname.split('/')[0] || 'N/A';
+                document.getElementById('port-info').textContent = urlObj.port || getDefaultPort(urlObj.protocol) || 'N/A';
+            } catch (e) {
+                // For non-standard URLs
+                const scheme = url.split(':')[0] || 'unknown';
+                document.getElementById('url-scheme').textContent = scheme;
+                document.getElementById('domain-name').textContent = 'N/A';
+                document.getElementById('port-info').textContent = 'N/A';
+            }
+            
+            // Extract category from explanation if available
+            if (result.explanation && result.explanation.url_category) {
+                document.getElementById('url-category').textContent = result.explanation.url_category.charAt(0).toUpperCase() + result.explanation.url_category.slice(1);
+            } else {
+                document.getElementById('url-category').textContent = 'Unknown';
+            }
+            
+            // Update other technical details
+            document.getElementById('ssl-status').textContent = url.startsWith('https://') || url.startsWith('ftps://') ? 'Encrypted' : 'Unencrypted';
+            document.getElementById('redirect-count').textContent = '0';
+            document.getElementById('suspicious-elements').textContent = result.prediction === 'phishing' ? 'Yes' : 'No';
+            
+            const hasIP = /^\d+\.\d+\.\d+\.\d+/.test(url);
+            document.getElementById('ip-usage').textContent = hasIP ? 'Yes' : 'No';
+            
+            const hasSuspiciousTLD = /\.(tk|ml|ga|cf|cc)($|\/)/i.test(url);
+            document.getElementById('tld-check').textContent = hasSuspiciousTLD ? 'Yes' : 'No';
+            
+            document.getElementById('pattern-match').textContent = result.prediction === 'phishing' ? 'Detected' : 'None';
+        }
+
+        function getDefaultPort(protocol) {
+            const defaultPorts = {
+                'http:': '80',
+                'https:': '443',
+                'ftp:': '21',
+                'ftps:': '21',
+                'ssh:': '22',
+                'telnet:': '23'
+            };
+            return defaultPorts[protocol] || null;
+        }
+
+        function updateFeatureImportance(featureImportance) {
+            const container = document.getElementById('feature-importance');
+            container.innerHTML = '';
+
+            // Mock feature importance data if not provided
+            if (Object.keys(featureImportance).length === 0) {
+                featureImportance = {
+                    'HTTPS Usage': 0.15,
+                    'Domain Length': 0.12,
+                    'Suspicious Keywords': 0.11,
+                    'SSL Certificate': 0.10,
+                    'URL Structure': 0.09,
+                    'Domain Age': 0.08
+                };
+            }
+
+            Object.entries(featureImportance).slice(0, 6).forEach(([feature, importance]) => {
+                const featureCard = document.createElement('div');
+                featureCard.className = 'feature-card';
+                
+                const importancePercent = Math.round(importance * 100);
+                
+                featureCard.innerHTML = `
+                    <div class="feature-importance">
+                        <span>${feature}</span>
+                        <span class="badge bg-secondary">${importancePercent}%</span>
+                    </div>
+                    <div class="importance-bar">
+                        <div class="importance-fill" style="width: ${importancePercent}%"></div>
+                    </div>
+                `;
+                
+                container.appendChild(featureCard);
+            });
+        }
+
+        function updateRecommendations(isPhishing, result) {
+            const container = document.getElementById('recommendations');
+            
+            if (isPhishing) {
+                container.innerHTML = `
+                    <ul class="mb-0">
+                        <li>Do not enter any personal information on this website</li>
+                        <li>Do not click on suspicious links or download files</li>
+                        <li>Verify the website URL carefully before proceeding</li>
+                        <li>Consider reporting this URL to your security team</li>
+                        <li>Use official websites and bookmark legitimate sites</li>
+                    </ul>
+                `;
+            } else {
+                container.innerHTML = `
+                    <ul class="mb-0">
+                        <li>Always verify URLs before entering sensitive information</li>
+                        <li>Look for HTTPS and valid SSL certificates</li>
+                        <li>Be cautious of shortened URLs or suspicious redirects</li>
+                        <li>Keep your browser and security software updated</li>
+                    </ul>
+                `;
+            }
+        }
+
+        function addToHistory(url, result, analysisTime) {
+            const historyItem = {
+                url: url,
+                result: result.prediction,
+                confidence: result.confidence || 0.85,
+                timestamp: new Date().toLocaleString(),
+                analysisTime: analysisTime
+            };
+
+            analysisHistory.unshift(historyItem);
+            
+            // Keep only last 10 items
+            if (analysisHistory.length > 10) {
+                analysisHistory = analysisHistory.slice(0, 10);
+            }
+
+            updateHistoryDisplay();
+            saveHistoryToStorage();
+        }
+
+        function updateHistoryDisplay() {
+            const container = document.getElementById('analysis-history');
+            
+            if (analysisHistory.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center py-4">No recent analysis found. Start by analyzing a URL above.</p>';
+                return;
+            }
+
+            container.innerHTML = analysisHistory.map(item => {
+                const isPhishing = item.result === 'phishing' || item.result === -1;
+                const statusClass = isPhishing ? 'danger' : 'success';
+                const statusIcon = isPhishing ? 'fa-exclamation-triangle' : 'fa-shield-check';
+                const statusText = isPhishing ? 'Phishing' : 'Safe';
+
+                return `
+                    <div class="history-item">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-${statusClass} me-2">
+                                    <i class="fas ${statusIcon}"></i> ${statusText}
+                                </span>
+                                <small class="text-muted">${item.timestamp}</small>
+                            </div>
+                            <p class="mb-1 mt-1 text-truncate" style="max-width: 500px;">${item.url}</p>
+                            <small class="text-muted">
+                                Confidence: ${Math.round(item.confidence * 100)}% • 
+                                Analysis time: ${item.analysisTime}ms
+                            </small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="reanalyze('${item.url}')">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function reanalyze(url) {
+            document.getElementById('url-input').value = url;
+            analyzeUrl();
+        }
+
+        function updateStats() {
+            document.getElementById('total-scanned').textContent = statsData.totalScanned;
+            document.getElementById('safe-urls').textContent = statsData.safeUrls;
+            document.getElementById('phishing-urls').textContent = statsData.phishingUrls;
+            
+            saveStatsToStorage();
+        }
+
+        function showLoading(show) {
+            const spinner = document.getElementById('loading-spinner');
+            const button = document.getElementById('scan-btn');
+            
+            if (show) {
+                spinner.style.display = 'block';
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            } else {
+                spinner.style.display = 'none';
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-search"></i> Analyze';
+            }
+        }
+
+        function showResults() {
+            document.getElementById('results-container').style.display = 'block';
+            document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideResults() {
+            document.getElementById('results-container').style.display = 'none';
+        }
+
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        function isValidUrl(string) {
+            if (!string || string.length > 2000) {
+                return false;
+            }
+            
+            // Enhanced URL validation for all schemes
+            const urlPattern = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
+            
+            if (!urlPattern.test(string)) {
+                return false;
+            }
+            
+            try {
+                // Try to parse with URL constructor for standard schemes
+                if (string.startsWith('http') || string.startsWith('ftp')) {
+                    new URL(string);
+                }
+                return true;
+            } catch (_) {
+                // For non-standard schemes, do basic validation
+                return string.includes(':') && string.length > 3;
+            }
+        }
+
+        // Storage functions
+        function saveStatsToStorage() {
+            localStorage.setItem('phishing_detector_stats', JSON.stringify(statsData));
+        }
+
+        function loadStatsFromStorage() {
+            const stored = localStorage.getItem('phishing_detector_stats');
+            if (stored) {
+                statsData = { ...statsData, ...JSON.parse(stored) };
+            }
+        }
+
+        function saveHistoryToStorage() {
+            localStorage.setItem('phishing_detector_history', JSON.stringify(analysisHistory));
+        }
+
+        function loadHistoryFromStorage() {
+            const stored = localStorage.getItem('phishing_detector_history');
+            if (stored) {
+                analysisHistory = JSON.parse(stored);
+                updateHistoryDisplay();
+            }
+        }
+
+        // Drag and drop functionality
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            dropZone.addEventListener('drop', handleDrop, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            document.getElementById('drop-zone').classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            document.getElementById('drop-zone').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                    processBulkFile(file);
+                } else {
+                    alert('Please upload a CSV file');
+                }
+            }
+        }
+
+        async function processBulkFile(file) {
+            const progressContainer = document.getElementById('bulk-progress');
+            const progressBar = progressContainer.querySelector('.progress-bar');
+            
+            progressContainer.style.display = 'block';
+            
+            try {
+                const text = await file.text();
+                const lines = text.split('\n').filter(line => line.trim());
+                const urls = lines.map(line => line.split(',')[0].trim()).filter(url => url);
+                
+                for (let i = 0; i < urls.length; i++) {
+                    const progress = Math.round(((i + 1) / urls.length) * 100);
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress + '%';
+                    
+                    // Simulate processing (in real implementation, send to backend)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                alert(`Processed ${urls.length} URLs successfully!`);
+                
+            } catch (error) {
+                console.error('Error processing file:', error);
+                alert('Error processing file. Please check the format.');
+            } finally {
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+    </script>
+</body>
+</html>

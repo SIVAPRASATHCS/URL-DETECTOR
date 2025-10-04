@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing URL Detection - Advanced Security Scanner</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .pulse-animation { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .result-safe { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .result-danger { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .result-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // API configuration
+        const API_BASE = window.location.origin;
+
+        // Components
+        const LoadingSpinner = () => (
+            <div className="loading-spinner mx-auto"></div>
+        );
+
+        const RiskBadge = ({ riskLevel, riskScore }) => {
+            const getBadgeClass = () => {
+                switch(riskLevel) {
+                    case 'low': return 'bg-green-100 text-green-800 border-green-200';
+                    case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                    case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
+                    case 'critical': return 'bg-red-100 text-red-800 border-red-200';
+                    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+                }
+            };
+
+            return (
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getBadgeClass()}`}>
+                    {riskLevel.toUpperCase()} ({(riskScore * 100).toFixed(1)}%)
+                </span>
+            );
+        };
+
+        const ResultCard = ({ result }) => {
+            const getCardClass = () => {
+                if (result.is_phishing) {
+                    return result.risk_score > 0.8 ? 'result-danger' : 'result-warning';
+                }
+                return 'result-safe';
+            };
+
+            const getIcon = () => {
+                if (result.is_phishing) {
+                    return result.risk_score > 0.8 ? 'fa-skull-crossbones' : 'fa-exclamation-triangle';
+                }
+                return 'fa-shield-alt';
+            };
+
+            return (
+                <div className={`rounded-lg p-6 text-white ${getCardClass()}`}>
+                    <div className="flex items-center justify-between mb-4">
+                        <i className={`fas ${getIcon()} text-2xl`}></i>
+                        <RiskBadge riskLevel={result.risk_level} riskScore={result.risk_score} />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-2">
+                        {result.is_phishing ? 'Phishing Detected!' : 'URL is Safe'}
+                    </h3>
+                    
+                    <p className="text-sm opacity-90 mb-4 break-all">
+                        {result.url}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span className="opacity-75">Confidence:</span>
+                            <span className="font-semibold ml-1">{(result.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div>
+                            <span className="opacity-75">Analysis Time:</span>
+                            <span className="font-semibold ml-1">{result.analysis_time.toFixed(2)}s</span>
+                        </div>
+                    </div>
+
+                    {result.recommendations && (
+                        <div className="mt-4 pt-4 border-t border-white border-opacity-20">
+                            <p className="text-sm opacity-75 mb-2">Recommendations:</p>
+                            <ul className="text-sm space-y-1">
+                                {result.recommendations.map((rec, idx) => (
+                                    <li key={idx} className="flex items-start">
+                                        <i className="fas fa-chevron-right mr-2 mt-1 text-xs"></i>
+                                        {rec}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const StatsCard = ({ title, value, icon, trend }) => (
+            <div className="bg-white rounded-lg p-6 card-hover">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-gray-600 text-sm">{title}</p>
+                        <p className="text-2xl font-bold text-gray-900">{value}</p>
+                        {trend && (
+                            <p className={`text-sm ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <i className={`fas fa-arrow-${trend > 0 ? 'up' : 'down'} mr-1`}></i>
+                                {Math.abs(trend)}%
+                            </p>
+                        )}
+                    </div>
+                    <div className={`p-3 rounded-full bg-blue-100 text-blue-600`}>
+                        <i className={`fas ${icon} text-xl`}></i>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [url, setUrl] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [result, setResult] = useState(null);
+            const [error, setError] = useState('');
+            const [stats, setStats] = useState(null);
+            const [history, setHistory] = useState([]);
+            const [activeTab, setActiveTab] = useState('scanner');
+            const [includeFeatures, setIncludeFeatures] = useState(false);
+            const [realtimeCheck, setRealtimeCheck] = useState(true);
+
+            // Fetch initial data
+            useEffect(() => {
+                fetchStats();
+                fetchHistory();
+            }, []);
+
+            const fetchStats = async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/v1/stats`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setStats(data);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch stats:', err);
+                }
+            };
+
+            const fetchHistory = async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/api/v1/history?limit=10`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setHistory(data.history || []);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch history:', err);
+                }
+            };
+
+            const analyzeUrl = async () => {
+                if (!url.trim()) {
+                    setError('Please enter a URL to analyze');
+                    return;
+                }
+
+                setIsLoading(true);
+                setError('');
+                setResult(null);
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/v1/analyze`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            url: url.trim(),
+                            include_features: includeFeatures,
+                            check_real_time: realtimeCheck
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setResult(data);
+                        fetchStats(); // Refresh stats
+                        fetchHistory(); // Refresh history
+                    } else {
+                        const errorData = await response.json();
+                        setError(errorData.detail || 'Analysis failed');
+                    }
+                } catch (err) {
+                    setError('Network error. Please check your connection.');
+                    console.error('Analysis error:', err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    analyzeUrl();
+                }
+            };
+
+            const renderScanner = () => (
+                <div className="space-y-8">
+                    {/* Main Scanner */}
+                    <div className="bg-white rounded-xl shadow-lg p-8">
+                        <div className="text-center mb-8">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                                <i className="fas fa-shield-alt text-blue-600 mr-3"></i>
+                                Phishing URL Detection
+                            </h1>
+                            <p className="text-gray-600 text-lg">
+                                Advanced AI-powered security scanner to protect you from malicious URLs
+                            </p>
+                        </div>
+
+                        <div className="max-w-4xl mx-auto">
+                            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+                                <input
+                                    type="text"
+                                    value={url}
+                                    onChange={(e) => setUrl(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    placeholder="Enter URL to analyze (e.g., https://example.com)"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                                    disabled={isLoading}
+                                />
+                                <button
+                                    onClick={analyzeUrl}
+                                    disabled={isLoading || !url.trim()}
+                                    className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px]"
+                                >
+                                    {isLoading ? <LoadingSpinner /> : 'Analyze URL'}
+                                </button>
+                            </div>
+
+                            {/* Advanced Options */}
+                            <div className="flex flex-wrap gap-4 justify-center mb-6">
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={realtimeCheck}
+                                        onChange={(e) => setRealtimeCheck(e.target.checked)}
+                                        className="rounded text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-600">Real-time threat intelligence</span>
+                                </label>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={includeFeatures}
+                                        onChange={(e) => setIncludeFeatures(e.target.checked)}
+                                        className="rounded text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-600">Include detailed features</span>
+                                </label>
+                            </div>
+
+                            {error && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                                    <div className="flex items-center">
+                                        <i className="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                                        <span className="text-red-700">{error}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {result && (
+                                <div className="mb-6">
+                                    <ResultCard result={result} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    {stats && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <StatsCard
+                                title="Total Scans"
+                                value={stats.overall?.total_scans?.toLocaleString() || '0'}
+                                icon="fa-search"
+                            />
+                            <StatsCard
+                                title="Threats Detected"
+                                value={stats.overall?.phishing_detected?.toLocaleString() || '0'}
+                                icon="fa-exclamation-triangle"
+                            />
+                            <StatsCard
+                                title="Detection Rate"
+                                value={`${stats.overall?.detection_rate || 0}%`}
+                                icon="fa-bullseye"
+                            />
+                            <StatsCard
+                                title="Avg Response Time"
+                                value={`${stats.overall?.avg_analysis_time || 0}s`}
+                                icon="fa-clock"
+                            />
+                        </div>
+                    )}
+                </div>
+            );
+
+            const renderHistory = () => (
+                <div className="bg-white rounded-xl shadow-lg p-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        <i className="fas fa-history text-blue-600 mr-3"></i>
+                        Recent Scans
+                    </h2>
+
+                    {history.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            <i className="fas fa-search text-4xl mb-4"></i>
+                            <p>No scans yet. Try analyzing a URL first!</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {history.map((scan, index) => (
+                                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                                {scan.url}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {new Date(scan.timestamp).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div className="ml-4 flex items-center space-x-3">
+                                            <RiskBadge 
+                                                riskLevel={scan.risk_level || (scan.is_phishing ? 'high' : 'low')} 
+                                                riskScore={scan.risk_score || scan.confidence} 
+                                            />
+                                            <i className={`fas ${scan.is_phishing ? 'fa-times-circle text-red-500' : 'fa-check-circle text-green-500'}`}></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Navigation */}
+                    <nav className="bg-white shadow-sm border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-8">
+                                    <h1 className="text-xl font-bold text-gray-900">
+                                        <i className="fas fa-shield-alt text-blue-600 mr-2"></i>
+                                        PhishGuard
+                                    </h1>
+                                    <div className="hidden md:flex space-x-4">
+                                        <button
+                                            onClick={() => setActiveTab('scanner')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'scanner' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            Scanner
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('history')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'history' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}`}
+                                        >
+                                            History
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <a href="/docs" target="_blank" className="text-gray-500 hover:text-gray-700">
+                                        <i className="fas fa-book"></i> API Docs
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Main Content */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {activeTab === 'scanner' && renderScanner()}
+                        {activeTab === 'history' && renderHistory()}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t border-gray-200 mt-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            <div className="text-center text-gray-500 text-sm">
+                                <p>© 2025 PhishGuard - Advanced Phishing URL Detection System</p>
+                                <p className="mt-1">Powered by AI and real-time threat intelligence</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

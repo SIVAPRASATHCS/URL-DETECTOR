@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "name": "phishing-url-detector",
+  "builds": [
+    {
+      "src": "enhanced_main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "enhanced_main.py"
+    }
+  ],
+  "env": {
+    "ENVIRONMENT": "production",
+    "MAX_REQUESTS_PER_MINUTE": "100"
+  },
+  "functions": {
+    "enhanced_main.py": {
+      "maxDuration": 30
+    }
+  }
+}
