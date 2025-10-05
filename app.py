@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import pickle
 import os
-from enhanced_feature_extractor import EnhancedFeatureExtractor
+from enhanced_feature_extractor import EnhancedFeatureExtraction
 
 app = FastAPI(title="Phishing URL Detector", description="AI-powered URL safety checker")
 
@@ -12,7 +12,7 @@ app = FastAPI(title="Phishing URL Detector", description="AI-powered URL safety 
 try:
     with open('pickle/advanced_model.pkl', 'rb') as f:
         model = pickle.load(f)
-    feature_extractor = EnhancedFeatureExtractor()
+    feature_extractor = EnhancedFeatureExtraction()
 except:
     model = None
     feature_extractor = None
