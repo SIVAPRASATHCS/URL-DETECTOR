@@ -9,7 +9,7 @@
 
 ## 🌟 **Live Demo**
 
-🔗 **Try it now:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL-DETECTOR) - Get your live URL in 1 minute!
+🔗 **Try it now:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL_DETECTOR) - Get your live URL in 1 minute!
 
 ![Phishing Detection Demo](https://via.placeholder.com/800x400/667eea/white?text=Phishing+URL+Detection+Tool)
 
@@ -48,8 +48,8 @@ Deploy to any cloud platform below to get your live URL - No local installation 
 ### **💻 Run Locally**
 ```bash
 # Clone the repository
-git clone https://github.com/SIVAPRASATHCS/URL-DETECTOR.git
-cd URL-DETECTOR
+git clone https://github.com/SIVAPRASATHCS/URL_DETECTOR.git
+cd URL_DETECTOR
 
 # Install dependencies
 pip install -r deploy_requirements.txt
@@ -68,8 +68,8 @@ python -m uvicorn enhanced_main:app --host 0.0.0.0 --port 8000
 
 ### **Step 1: Clone Repository**
 ```bash
-git clone https://github.com/SIVAPRASATHCS/URL-DETECTOR.git
-cd URL-DETECTOR
+git clone https://github.com/SIVAPRASATHCS/URL_DETECTOR.git
+cd URL_DETECTOR
 ```
 
 ### **Step 2: Install Dependencies**
@@ -103,17 +103,17 @@ Deploy your phishing URL detector for public access in minutes!
 **Option B: Manual Deploy**
 1. Visit [railway.app](https://railway.app)
 2. Click "New Project" → "Empty Project"
-3. Connect GitHub: `SIVAPRASATHCS/URL-DETECTOR`
+3. Connect GitHub: `SIVAPRASATHCS/URL_DETECTOR`
 4. Set start command: `uvicorn enhanced_main:app --host 0.0.0.0 --port $PORT`
 5. Deploy and get: `https://your-app.railway.app`
 
 #### **⚡ Vercel** (Fastest deployment - 1 minute)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL-DETECTOR)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL_DETECTOR)
 
 **Manual steps:**
 1. Visit [vercel.com](https://vercel.com)
 2. Click "New Project" → Import from GitHub
-3. Select `SIVAPRASATHCS/URL-DETECTOR`
+3. Select `SIVAPRASATHCS/URL_DETECTOR`
 4. **Automatic deployment!** - Vercel detects Python + FastAPI
 5. Get URL: `https://your-app.vercel.app`
 
@@ -267,8 +267,8 @@ phishing-url-detection/
 We welcome contributions! Here's how you can help:
 
 ### **🐛 Report Issues**
-- Found a bug? [Create an issue](https://github.com/SIVAPRASATHCS/URL-DETECTOR/issues)
-- Have a suggestion? [Start a discussion](https://github.com/SIVAPRASATHCS/URL-DETECTOR/discussions)
+- Found a bug? [Create an issue](https://github.com/SIVAPRASATHCS/URL_DETECTOR/issues)
+- Have a suggestion? [Start a discussion](https://github.com/SIVAPRASATHCS/URL_DETECTOR/discussions)
 
 ### **✨ Contribute Code**
 1. Fork the repository
@@ -301,7 +301,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 **Links**
 
-- **🐙 Repository:** [GitHub](https://github.com/SIVAPRASATHCS/URL-DETECTOR)
+- **🐙 Repository:** [GitHub](https://github.com/SIVAPRASATHCS/URL_DETECTOR)
 - **📊 API Docs:** [Interactive Documentation](/docs)
 - **🤝 Contributing:** [Guidelines](CONTRIBUTING.md)
 
@@ -311,8 +311,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🛡️ Help make the internet safer, one URL at a time! 🌐**
 
-[![GitHub stars](https://img.shields.io/github/stars/SIVAPRASATHCS/URL-DETECTOR?style=social)](https://github.com/SIVAPRASATHCS/URL-DETECTOR)
-[![GitHub forks](https://img.shields.io/github/forks/SIVAPRASATHCS/URL-DETECTOR?style=social)](https://github.com/SIVAPRASATHCS/URL-DETECTOR)
+[![GitHub stars](https://img.shields.io/github/stars/SIVAPRASATHCS/URL_DETECTOR?style=social)](https://github.com/SIVAPRASATHCS/URL_DETECTOR)
+[![GitHub forks](https://img.shields.io/github/forks/SIVAPRASATHCS/URL_DETECTOR?style=social)](https://github.com/SIVAPRASATHCS/URL_DETECTOR)
 
 *Made with ❤️ by [SIVAPRASATHCS](https://github.com/SIVAPRASATHCS)*
 

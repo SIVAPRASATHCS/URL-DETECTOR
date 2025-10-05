@@ -2,35 +2,35 @@
 Vercel-compatible entry point for the Phishing URL Detection API
 """
 
-import sys
 import os
+import sys
+from pathlib import Path
 
-# Add the parent directory to the path so we can import our modules
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# Add the parent directory to the path
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
 
 try:
+    # Import the FastAPI app
     from enhanced_main import app
     
-    # Vercel expects a handler function
-    def handler(request, response):
-        return app(request, response)
+    # Export for Vercel
+    handler = app
     
-    # Also export the app directly for compatibility
-    application = app
-    
-except Exception as e:
-    print(f"Error importing enhanced_main: {e}")
-    # Create a minimal fallback app
+except ImportError as e:
+    print(f"Import error: {e}")
+    # Fallback minimal app
     from fastapi import FastAPI
     from fastapi.responses import JSONResponse
     
-    app = FastAPI(title="Phishing URL Detector", description="Error loading main application")
+    app = FastAPI()
     
     @app.get("/")
-    async def fallback():
-        return JSONResponse({
-            "error": "Application failed to load",
-            "message": "Please check deployment configuration"
-        })
+    async def root():
+        return {"message": "Phishing URL Detector API", "status": "running"}
     
-    application = app
+    @app.get("/health")
+    async def health():
+        return {"status": "healthy"}
+    
+    handler = app
