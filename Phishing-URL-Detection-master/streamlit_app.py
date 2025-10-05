@@ -335,7 +335,7 @@ def main():
     st.markdown("""
     <div style='text-align: center; color: #666; margin-top: 2rem;'>
         <p>🛡️ <strong>Phishing URL Detector</strong> | Powered by Machine Learning | 
-        <a href='https://github.com/SIVAPRASATHCS/URL_DETECTOR' target='_blank'>View on GitHub</a></p>
+        <a href='https://github.com/SIVAPRASATHCS/url_detector' target='_blank'>View on GitHub</a></p>
         <p><small>Made with ❤️ using Streamlit | Last updated: {}</small></p>
     </div>
     """.format(datetime.now().strftime("%B %Y")), unsafe_allow_html=True)
