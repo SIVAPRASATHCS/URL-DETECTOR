@@ -9,7 +9,7 @@
 
 ## 🌟 **Live Demo**
 
-🔗 **Try it now:** [Deploy to Railway](https://railway.app/new/template?template=https://github.com/SIVAPRASATHCS/URL-DETECTOR) - Get your live URL in minutes!
+🔗 **Try it now:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL-DETECTOR) - Get your live URL in 1 minute!
 
 ![Phishing Detection Demo](https://via.placeholder.com/800x400/667eea/white?text=Phishing+URL+Detection+Tool)
 
@@ -96,11 +96,26 @@ Deploy your phishing URL detector for public access in minutes!
 ### **☁️ Cloud Platforms (Recommended):**
 
 #### **🔥 Railway.app** (Easiest - 2 minutes)
+
+**Option A: Direct Template Deploy**
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/DIY9WE)
+
+**Option B: Manual Deploy**
 1. Visit [railway.app](https://railway.app)
-2. Click "Deploy from GitHub"
-3. Connect this repository
-4. **Automatic deployment!**
-5. Get public URL: `https://your-app.railway.app`
+2. Click "New Project" → "Empty Project"
+3. Connect GitHub: `SIVAPRASATHCS/URL-DETECTOR`
+4. Set start command: `uvicorn enhanced_main:app --host 0.0.0.0 --port $PORT`
+5. Deploy and get: `https://your-app.railway.app`
+
+#### **⚡ Vercel** (Fastest deployment - 1 minute)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SIVAPRASATHCS/URL-DETECTOR)
+
+**Manual steps:**
+1. Visit [vercel.com](https://vercel.com)
+2. Click "New Project" → Import from GitHub
+3. Select `SIVAPRASATHCS/URL-DETECTOR`
+4. **Automatic deployment!** - Vercel detects Python + FastAPI
+5. Get URL: `https://your-app.vercel.app`
 
 #### **🌊 Render.com** (Free tier available)
 1. Visit [render.com](https://render.com)
