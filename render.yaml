@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: secureurl-guardian
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python simplified_responsive_app.py
+    envVars:
+      - key: PORT
+        sync: false
+      - key: HOST
+        value: "0.0.0.0"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+    healthCheckPath: /health
