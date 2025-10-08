@@ -314,6 +314,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [![GitHub stars](https://img.shields.io/github/stars/SIVAPRASATHCS/url_detector?style=social)](https://github.com/SIVAPRASATHCS/url_detector)
 [![GitHub forks](https://img.shields.io/github/forks/SIVAPRASATHCS/url_detector?style=social)](https://github.com/SIVAPRASATHCS/url_detector)
 
-*Made with ❤️ by [SIVAPRASATHCS](https://github.com/SIVAPRASATHCS)*
+*Made by [SIVAPRASATHCS](https://github.com/SIVAPRASATHCS)*
 
 </div>
