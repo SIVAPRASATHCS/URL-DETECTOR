@@ -1,0 +1,59 @@
+
+🛡️ URL SECURITY ANALYSIS REPORT
+================================
+
+Analysis ID: 3d79195b-f730-4250-a609-47a651f73609
+URL Analyzed: https://secure-banking-verification.tk
+Analysis Date: 2025-10-08T14:26:45
+
+SECURITY ASSESSMENT
+==================
+Risk Level: High
+Risk Score: 75/100
+Confidence: 100.0%
+Safety Status: POTENTIALLY DANGEROUS
+
+THREATS DETECTED
+================
+1. High-risk TLD: .tk
+2. Potential banking threat: bank
+3. Potential banking threat: banking
+4. Potential security threat: secure
+5. Phishing pattern detected: verification
+
+
+SECURITY INDICATORS
+==================
+Url Length: 38
+Domain Length: 30
+Subdomain Count: 0
+Has Https: True
+Has Port: False
+Path Depth: 0
+Query Parameters: 0
+Special Characters: 2
+Url Entropy: 4.21
+Domain Entropy: 3.92
+Homograph Attack: False
+Typosquatting: False
+Subdomain Abuse: False
+Url Shortener: False
+Suspicious Encoding: False
+
+
+SECURITY RECOMMENDATIONS
+========================
+1.  HIGH RISK: Do not enter any personal information on this website
+2.  Avoid downloading files or clicking links on this site
+3.  Contact the organization directly using official contact methods
+4.  Use updated antivirus software before visiting similar sites
+5.  Potential phishing attempt - verify with official sources
+
+
+TECHNICAL DETAILS
+================
+Analysis Duration: 313ms
+Performance Score: A
+
+Report generated on October 08, 2025 at 02:26 PM
+SecureURL Guardian v3.0 - Advanced Threat Detection System

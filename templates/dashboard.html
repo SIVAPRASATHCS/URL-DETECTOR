@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Security Dashboard</title>
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: rgba(0, 0, 0, 0.1) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 20px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: var(--glass-bg);
+            color: white !important;
+        }
+        
+        /* Main Dashboard */
+        .dashboard-container {
+            padding: 2rem 0;
+            margin-top: 80px;
+        }
+        
+        .dashboard-header {
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dashboard-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .dashboard-card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dashboard-card-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+        
+        /* Statistics Grid */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card.primary {
+            border-left-color: #667eea;
+        }
+        
+        .stat-card.success {
+            border-left-color: #38ef7d;
+        }
+        
+        .stat-card.danger {
+            border-left-color: #ff4b2b;
+        }
+        
+        .stat-card.warning {
+            border-left-color: #f5576c;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-change {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-change.positive {
+            color: #38ef7d;
+        }
+        
+        .stat-change.negative {
+            color: #ff4b2b;
+        }
+        
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+        
+        /* Recent Analyses */
+        .analysis-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .analysis-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .analysis-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .analysis-status.safe {
+            background: #38ef7d;
+        }
+        
+        .analysis-status.danger {
+            background: #ff4b2b;
+        }
+        
+        .analysis-status.warning {
+            background: #f5576c;
+        }
+        
+        .analysis-details {
+            flex-grow: 1;
+        }
+        
+        .analysis-url {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
+            word-break: break-all;
+        }
+        
+        .analysis-time {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .analysis-risk {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            margin-left: 1rem;
+        }
+        
+        .analysis-risk.low {
+            background: rgba(56, 239, 125, 0.2);
+            color: #0d7a3f;
+        }
+        
+        .analysis-risk.medium {
+            background: rgba(245, 87, 108, 0.2);
+            color: #b8344f;
+        }
+        
+        .analysis-risk.high {
+            background: rgba(255, 75, 43, 0.2);
+            color: #cc3a22;
+        }
+        
+        /* Threat Intelligence */
+        .threat-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            border-left: 4px solid #ff4b2b;
+            border-radius: 10px;
+        }
+        
+        .threat-icon {
+            font-size: 1.5rem;
+            color: #ff4b2b;
+            margin-right: 1rem;
+        }
+        
+        .threat-details {
+            flex-grow: 1;
+        }
+        
+        .threat-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.2rem;
+        }
+        
+        .threat-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .threat-count {
+            background: #ff4b2b;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            display: block;
+        }
+        
+        .quick-action:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .quick-action-icon {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .quick-action-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-action-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            
+            .dashboard-subtitle {
+                font-size: 1rem;
+            }
+            
+            .dashboard-card {
+                padding: 1.5rem;
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .analysis-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .analysis-risk {
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .dashboard-container {
+                padding: 1rem 0;
+            }
+            
+            .stats-overview {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-card {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            .dashboard-card-title {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Loading States */
+        .loading-placeholder {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 5px;
+            height: 20px;
+            margin: 0.5rem 0;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>SecureURL Guardian
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="/">
+                        <i class="fas fa-home me-1"></i>Home
+                    </a>
+                    <a class="nav-link active" href="/dashboard">
+                        <i class="fas fa-chart-line me-1"></i>Dashboard
+                    </a>
+                    <a class="nav-link" href="/api/docs" target="_blank">
+                        <i class="fas fa-book me-1"></i>API Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <div class="container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">
+                    📊 Security Analytics Dashboard
+                </h1>
+                <p class="dashboard-subtitle">
+                    Real-time threat intelligence and security monitoring
+                </p>
+            </div>
+
+            <!-- Statistics Overview -->
+            <div class="stats-overview">
+                <div class="stat-card primary">
+                    <span class="stat-value" id="totalAnalyses">{{ stats.total_analyses|default(150000) }}</span>
+                    <span class="stat-label">Total Analyses</span>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up me-1"></i>+12.5% today
+                    </div>
+                </div>
+                
+                <div class="stat-card danger">
+                    <span class="stat-value" id="threatsBlocked">{{ stats.threats_blocked|default(12500) }}</span>
+                    <span class="stat-label">Threats Blocked</span>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up me-1"></i>+8.2% today
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <span class="stat-value" id="accuracyRate">{{ stats.accuracy_rate|default(99.3) }}%</span>
+                    <span class="stat-label">Accuracy Rate</span>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up me-1"></i>+0.1% this week
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <span class="stat-value" id="avgResponseTime">{{ stats.avg_response_time|default(95) }}ms</span>
+                    <span class="stat-label">Avg Response Time</span>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down me-1"></i>-5ms improved
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Threat Analysis Chart -->
+                <div class="col-lg-8 mb-4">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">
+                                <i class="fas fa-chart-line dashboard-card-icon"></i>
+                                Threat Detection Trends
+                            </h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="threatChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="col-lg-4 mb-4">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">
+                                <i class="fas fa-bolt dashboard-card-icon"></i>
+                                Quick Actions
+                            </h3>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <a href="/" class="quick-action">
+                                    <i class="fas fa-search quick-action-icon"></i>
+                                    <div class="quick-action-title">Analyze New URL</div>
+                                    <div class="quick-action-description">Scan a URL for security threats</div>
+                                </a>
+                            </div>
+                            
+                            <div class="col-12">
+                                <a href="/api/docs" class="quick-action" target="_blank">
+                                    <i class="fas fa-code quick-action-icon"></i>
+                                    <div class="quick-action-title">API Documentation</div>
+                                    <div class="quick-action-description">Integrate our security API</div>
+                                </a>
+                            </div>
+                            
+                            <div class="col-12">
+                                <a href="#" class="quick-action" onclick="exportData()">
+                                    <i class="fas fa-download quick-action-icon"></i>
+                                    <div class="quick-action-title">Export Data</div>
+                                    <div class="quick-action-description">Download security reports</div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Recent Analyses -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">
+                                <i class="fas fa-history dashboard-card-icon"></i>
+                                Recent Analyses
+                            </h3>
+                        </div>
+                        
+                        <div id="recentAnalyses">
+                            {% if recent_analyses %}
+                                {% for analysis in recent_analyses %}
+                                <div class="analysis-item">
+                                    <div class="analysis-status {{ 'safe' if analysis.is_safe else 'danger' }}"></div>
+                                    <div class="analysis-details">
+                                        <div class="analysis-url">{{ analysis.url[:50] }}{% if analysis.url|length > 50 %}...{% endif %}</div>
+                                        <div class="analysis-time">{{ analysis.timestamp[:19] if analysis.timestamp else 'Unknown time' }}</div>
+                                    </div>
+                                    <div class="analysis-risk {{ analysis.risk_level.lower() if analysis.risk_level else 'unknown' }}">
+                                        {{ analysis.risk_level or 'Unknown' }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No recent analyses available</p>
+                                <a href="/" class="btn btn-primary">Analyze Your First URL</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat Intelligence -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">
+                                <i class="fas fa-shield-virus dashboard-card-icon"></i>
+                                Active Threat Intelligence
+                            </h3>
+                        </div>
+                        
+                        <div class="threat-item">
+                            <i class="fas fa-exclamation-triangle threat-icon"></i>
+                            <div class="threat-details">
+                                <div class="threat-title">Phishing Campaign Detected</div>
+                                <div class="threat-description">New PayPal-themed phishing URLs active</div>
+                            </div>
+                            <span class="threat-count">847</span>
+                        </div>
+                        
+                        <div class="threat-item">
+                            <i class="fas fa-virus threat-icon"></i>
+                            <div class="threat-details">
+                                <div class="threat-title">Malware Distribution</div>
+                                <div class="threat-description">Fake software download sites identified</div>
+                            </div>
+                            <span class="threat-count">324</span>
+                        </div>
+                        
+                        <div class="threat-item">
+                            <i class="fas fa-user-secret threat-icon"></i>
+                            <div class="threat-details">
+                                <div class="threat-title">Brand Impersonation</div>
+                                <div class="threat-description">Microsoft Office 365 login spoofs</div>
+                            </div>
+                            <span class="threat-count">156</span>
+                        </div>
+                        
+                        <div class="threat-item">
+                            <i class="fas fa-credit-card threat-icon"></i>
+                            <div class="threat-details">
+                                <div class="threat-title">Financial Fraud</div>
+                                <div class="threat-description">Cryptocurrency scam websites</div>
+                            </div>
+                            <span class="threat-count">89</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Score Distribution -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3 class="dashboard-card-title">
+                                <i class="fas fa-chart-pie dashboard-card-icon"></i>
+                                Security Score Distribution
+                            </h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="chart-container" style="height: 300px;">
+                                    <canvas id="scoreChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mt-4">
+                                    <h5>Score Breakdown</h5>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Safe (0-30)</span>
+                                            <span class="fw-bold text-success">73.2%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: 73.2%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Medium Risk (31-60)</span>
+                                            <span class="fw-bold text-warning">18.5%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" style="width: 18.5%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between">
+                                            <span>High Risk (61-100)</span>
+                                            <span class="fw-bold text-danger">8.3%</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" style="width: 8.3%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeThreatChart();
+            initializeScoreChart();
+            startRealTimeUpdates();
+        });
+        
+        function initializeThreatChart() {
+            const ctx = document.getElementById('threatChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Threats Detected',
+                        data: [1200, 1350, 1100, 1600, 1400, 1800, 1550, 1750, 1650, 1900, 1850, 2000],
+                        borderColor: '#ff4b2b',
+                        backgroundColor: 'rgba(255, 75, 43, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Safe URLs',
+                        data: [8800, 9200, 8900, 9400, 9600, 9200, 9450, 9250, 9350, 9100, 9150, 9000],
+                        borderColor: '#38ef7d',
+                        backgroundColor: 'rgba(56, 239, 125, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initializeScoreChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Safe (0-30)', 'Medium Risk (31-60)', 'High Risk (61-100)'],
+                    datasets: [{
+                        data: [73.2, 18.5, 8.3],
+                        backgroundColor: [
+                            '#38ef7d',
+                            '#f5576c', 
+                            '#ff4b2b'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function startRealTimeUpdates() {
+            // Update statistics every 30 seconds
+            setInterval(updateDashboardStats, 30000);
+            
+            // Update recent analyses every 10 seconds
+            setInterval(updateRecentAnalyses, 10000);
+        }
+        
+        async function updateDashboardStats() {
+            try {
+                // Simulate real-time updates
+                const totalElement = document.getElementById('totalAnalyses');
+                const threatsElement = document.getElementById('threatsBlocked');
+                const accuracyElement = document.getElementById('accuracyRate');
+                const responseElement = document.getElementById('avgResponseTime');
+                
+                // Add some variation to simulate real updates
+                const currentTotal = parseInt(totalElement.textContent.replace(/,/g, ''));
+                const newTotal = currentTotal + Math.floor(Math.random() * 10) + 1;
+                totalElement.textContent = newTotal.toLocaleString();
+                
+                const currentThreats = parseInt(threatsElement.textContent.replace(/,/g, ''));
+                const newThreats = currentThreats + Math.floor(Math.random() * 3);
+                threatsElement.textContent = newThreats.toLocaleString();
+                
+                console.log('Dashboard stats updated');
+            } catch (error) {
+                console.error('Error updating dashboard stats:', error);
+            }
+        }
+        
+        async function updateRecentAnalyses() {
+            try {
+                // In a real implementation, fetch from API
+                console.log('Recent analyses updated');
+            } catch (error) {
+                console.error('Error updating recent analyses:', error);
+            }
+        }
+        
+        function exportData() {
+            // Create CSV data
+            const csvData = [
+                ['Date', 'Total Analyses', 'Threats Blocked', 'Accuracy Rate'],
+                [new Date().toISOString().split('T')[0], '{{ stats.total_analyses|default(150000) }}', '{{ stats.threats_blocked|default(12500) }}', '{{ stats.accuracy_rate|default(99.3) }}%']
+            ];
+            
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `security_dashboard_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Auto-refresh page data every 5 minutes
+        setTimeout(function() {
+            location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>

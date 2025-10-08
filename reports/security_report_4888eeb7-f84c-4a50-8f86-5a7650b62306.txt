@@ -1,0 +1,58 @@
+
+🛡️ URL SECURITY ANALYSIS REPORT
+================================
+
+Analysis ID: 4888eeb7-f84c-4a50-8f86-5a7650b62306
+URL Analyzed: https://paypal-secure-verification.tk
+Analysis Date: 2025-10-08T14:16:04
+
+SECURITY ASSESSMENT
+==================
+Risk Level: High
+Risk Score: 60/100
+Confidence: 100.0%
+Safety Status: POTENTIALLY DANGEROUS
+
+THREATS DETECTED
+================
+1. High-risk TLD: .tk
+2. Potential phishing threat: paypal
+3. Potential security threat: secure
+4. Phishing pattern detected: verification
+
+
+SECURITY INDICATORS
+==================
+Url Length: 37
+Domain Length: 29
+Subdomain Count: 0
+Has Https: True
+Has Port: False
+Path Depth: 0
+Query Parameters: 0
+Special Characters: 2
+Url Entropy: 4.21
+Domain Entropy: 4.02
+Homograph Attack: False
+Typosquatting: False
+Subdomain Abuse: False
+Url Shortener: False
+Suspicious Encoding: False
+
+
+SECURITY RECOMMENDATIONS
+========================
+1.  MEDIUM RISK: Exercise extreme caution on this website
+2.  Verify the website URL manually by typing it directly
+3.  Check official social media or contact information
+4.  Use two-factor authentication if you must proceed
+5.  Potential phishing attempt - verify with official sources
+
+
+TECHNICAL DETAILS
+================
+Analysis Duration: 292ms
+Performance Score: A
+
+Report generated on October 08, 2025 at 02:16 PM
+SecureURL Guardian v3.0 - Advanced Threat Detection System
